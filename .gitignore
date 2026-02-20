@@ -29,6 +29,7 @@ node_modules/
 frontend/dist/
 frontend/build/
 .npm
+*.tsbuildinfo
 
 # Testing
 .pytest_cache/
