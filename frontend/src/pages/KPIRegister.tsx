@@ -71,7 +71,7 @@ export function KPIRegister() {
 
       <DataTable
         columns={columns}
-        data={(conflicts || []) as unknown as Record<string, unknown>[]}
+        data={conflicts || []}
         emptyMessage="No KPI conflicts found. Run analysis to detect conflicts."
       />
     </div>

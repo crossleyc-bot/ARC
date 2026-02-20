@@ -20,7 +20,7 @@ class ReportCluster(Base):
         String(50), nullable=False
     )  # exact_duplicate, near_duplicate, family
     similarity_score: Mapped[float | None] = mapped_column(Float, nullable=True)
-    metadata: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    cluster_metadata: Mapped[dict | None] = mapped_column("metadata", JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     project = relationship("Project", back_populates="clusters")

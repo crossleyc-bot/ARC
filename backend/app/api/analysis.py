@@ -139,7 +139,7 @@ async def get_cluster(cluster_id: uuid.UUID, db: AsyncSession = Depends(get_db))
         member_count=len(members),
         created_at=cluster.created_at,
         members=members,
-        metadata=cluster.metadata,
+        metadata=cluster.cluster_metadata,
     )
 
 
@@ -176,9 +176,12 @@ async def update_kpi_conflict(
 
 @router.get("/projects/{project_id}/similarity-matrix", response_model=SimilarityMatrixResponse)
 async def get_similarity_matrix(project_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    from app.engine.similarity import build_similarity_matrix
+
     result = await db.execute(
         select(Report)
         .where(Report.project_id == project_id)
+        .options(selectinload(Report.measures))
         .order_by(Report.name.asc())
     )
     reports = result.scalars().all()
@@ -186,9 +189,23 @@ async def get_similarity_matrix(project_id: uuid.UUID, db: AsyncSession = Depend
     if not reports:
         return SimilarityMatrixResponse(report_ids=[], report_names=[], matrix=[])
 
-    # Return identity matrix as placeholder; real matrix is computed by analysis engine
-    n = len(reports)
-    matrix = [[1.0 if i == j else 0.0 for j in range(n)] for i in range(n)]
+    # Build report dicts for the similarity engine
+    report_dicts = [
+        {
+            "name": r.name,
+            "fields_used": r.fields_used or [],
+            "content_hash": r.content_hash,
+            "raw_metadata": r.raw_metadata or {},
+            "measures": [
+                {"name": m.name, "expression": m.expression, "data_type": m.data_type}
+                for m in r.measures
+            ],
+        }
+        for r in reports
+    ]
+
+    sim_matrix = build_similarity_matrix(report_dicts)
+    matrix = sim_matrix.tolist() if hasattr(sim_matrix, "tolist") else []
 
     return SimilarityMatrixResponse(
         report_ids=[r.id for r in reports],

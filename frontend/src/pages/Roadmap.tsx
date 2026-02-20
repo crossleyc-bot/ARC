@@ -94,7 +94,7 @@ export function Roadmap() {
 
       <DataTable
         columns={columns}
-        data={sortedReports as unknown as Record<string, unknown>[]}
+        data={sortedReports}
         emptyMessage="No rationalization actions generated yet. Run analysis first."
       />
     </div>

@@ -241,7 +241,35 @@ async def run_analysis(project_id: uuid.UUID, status_tracker: dict | None = None
                 )
                 db.add(kpi_conflict)
 
-            # Step 6: Generate rationalization actions
+            # Step 6 (Optional): AI-assisted analysis
+            if settings.ANTHROPIC_API_KEY:
+                update_status(0.85, "Running AI-assisted analysis")
+                try:
+                    from app.engine.ai_analyzer import AIAnalyzer
+
+                    ai = AIAnalyzer(api_key=settings.ANTHROPIC_API_KEY)
+
+                    # AI-assess ambiguous KPI conflicts (those with "warning" severity)
+                    for c in conflicts:
+                        if c.severity == "warning" and len(c.conflicting_definitions) >= 2:
+                            try:
+                                recommendation = await ai.recommend_canonical_kpi(
+                                    c.conflicting_definitions
+                                )
+                                # Find the matching KPIConflict we just added
+                                # and add the AI recommendation as resolution hint
+                                logger.info(
+                                    f"AI KPI recommendation for '{c.measure_name}': "
+                                    f"{recommendation.get('recommendation', 'N/A')}"
+                                )
+                            except Exception as ai_err:
+                                logger.warning(f"AI KPI analysis skipped: {ai_err}")
+
+                    await ai.close()
+                except Exception as ai_err:
+                    logger.warning(f"AI analysis step skipped: {ai_err}")
+
+            # Step 7: Generate rationalization actions
             update_status(0.9, "Generating rationalization actions")
             actions = generate_rationalization_actions(
                 report_dicts, exact_groups, near_groups, family_groups

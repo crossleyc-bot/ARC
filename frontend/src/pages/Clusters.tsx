@@ -62,7 +62,7 @@ export function Clusters() {
 
       <DataTable
         columns={columns}
-        data={(clusters || []) as unknown as Record<string, unknown>[]}
+        data={clusters || []}
         emptyMessage="No clusters found. Run analysis to detect report clusters."
       />
     </div>

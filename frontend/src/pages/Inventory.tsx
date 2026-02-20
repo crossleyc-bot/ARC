@@ -94,7 +94,7 @@ export function Inventory() {
             <>
               <DataTable
                 columns={reportColumns}
-                data={(reportsData?.items || []) as unknown as Record<string, unknown>[]}
+                data={reportsData?.items || []}
                 emptyMessage="No reports found. Connect a BI platform and run a sync."
               />
               {reportsData && reportsData.total > 50 && (
@@ -128,7 +128,7 @@ export function Inventory() {
           ) : (
             <DataTable
               columns={datasetColumns}
-              data={(datasetsData?.items || []) as unknown as Record<string, unknown>[]}
+              data={datasetsData?.items || []}
               emptyMessage="No datasets found."
             />
           )}

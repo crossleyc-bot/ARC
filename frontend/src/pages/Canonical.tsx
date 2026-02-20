@@ -101,7 +101,7 @@ export function Canonical() {
 
       <DataTable
         columns={columns}
-        data={(datasets || []) as unknown as Record<string, unknown>[]}
+        data={datasets || []}
         emptyMessage="No canonical datasets yet. Run analysis and canonicalization first."
       />
     </div>
