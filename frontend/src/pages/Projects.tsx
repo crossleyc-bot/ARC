@@ -24,7 +24,17 @@ export function Projects() {
       setDescription('');
       setShowCreate(false);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to create project';
+      let message = 'Failed to create project';
+      if (err && typeof err === 'object') {
+        const axiosErr = err as { response?: { data?: { detail?: string }; status?: number }; message?: string };
+        if (axiosErr.response?.data?.detail) {
+          message = axiosErr.response.data.detail;
+        } else if (axiosErr.response?.status) {
+          message = `Server error (${axiosErr.response.status})`;
+        } else if (axiosErr.message) {
+          message = axiosErr.message;
+        }
+      }
       setError(message);
     }
   };
@@ -71,14 +81,14 @@ export function Projects() {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-arc-500"
               rows={2}
             />
-            {error && (
+            {(error || createProject.isError) && (
               <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                {error}
+                {error || (createProject.error instanceof Error ? createProject.error.message : 'Failed to create project')}
               </div>
             )}
             {loadError && (
               <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                Cannot reach API: {loadError.message}
+                Cannot reach API — is the backend running?
               </div>
             )}
             <div className="flex gap-2">
