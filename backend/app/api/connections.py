@@ -53,7 +53,7 @@ async def list_connections(project_id: uuid.UUID, db: AsyncSession = Depends(get
     return result.scalars().all()
 
 
-@router.get("/{connection_id}", response_model=ConnectionResponse)
+@router.get("/connections/{connection_id}", response_model=ConnectionResponse)
 async def get_connection(connection_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     connection = await db.get(Connection, connection_id)
     if not connection:
@@ -61,7 +61,7 @@ async def get_connection(connection_id: uuid.UUID, db: AsyncSession = Depends(ge
     return connection
 
 
-@router.put("/{connection_id}", response_model=ConnectionResponse)
+@router.put("/connections/{connection_id}", response_model=ConnectionResponse)
 async def update_connection(
     connection_id: uuid.UUID, data: ConnectionUpdate, db: AsyncSession = Depends(get_db)
 ):
@@ -79,7 +79,7 @@ async def update_connection(
     return connection
 
 
-@router.delete("/{connection_id}", status_code=204)
+@router.delete("/connections/{connection_id}", status_code=204)
 async def delete_connection(connection_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     connection = await db.get(Connection, connection_id)
     if not connection:
@@ -88,7 +88,7 @@ async def delete_connection(connection_id: uuid.UUID, db: AsyncSession = Depends
     await db.commit()
 
 
-@router.post("/{connection_id}/sync", response_model=SyncStatusResponse)
+@router.post("/connections/{connection_id}/sync", response_model=SyncStatusResponse)
 async def sync_connection(
     connection_id: uuid.UUID,
     background_tasks: BackgroundTasks,
@@ -115,7 +115,7 @@ async def sync_connection(
     )
 
 
-@router.get("/{connection_id}/sync-status", response_model=SyncStatusResponse)
+@router.get("/connections/{connection_id}/sync-status", response_model=SyncStatusResponse)
 async def get_sync_status(connection_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     connection = await db.get(Connection, connection_id)
     if not connection:

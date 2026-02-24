@@ -8,18 +8,25 @@ import { useQueryClient } from '@tanstack/react-query';
 export function Projects() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { data: projects, isLoading } = useProjects();
+  const { data: projects, isLoading, error: loadError } = useProjects();
   const createProject = useCreateProject();
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   const handleCreate = async () => {
     if (!name.trim()) return;
-    await createProject.mutateAsync({ name: name.trim(), description: description.trim() || undefined });
-    setName('');
-    setDescription('');
-    setShowCreate(false);
+    setError(null);
+    try {
+      await createProject.mutateAsync({ name: name.trim(), description: description.trim() || undefined });
+      setName('');
+      setDescription('');
+      setShowCreate(false);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to create project';
+      setError(message);
+    }
   };
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
@@ -64,6 +71,16 @@ export function Projects() {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-arc-500"
               rows={2}
             />
+            {error && (
+              <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                {error}
+              </div>
+            )}
+            {loadError && (
+              <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                Cannot reach API: {loadError.message}
+              </div>
+            )}
             <div className="flex gap-2">
               <button
                 onClick={handleCreate}
@@ -73,13 +90,19 @@ export function Projects() {
                 {createProject.isPending ? 'Creating...' : 'Create'}
               </button>
               <button
-                onClick={() => setShowCreate(false)}
+                onClick={() => { setShowCreate(false); setError(null); }}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm"
               >
                 Cancel
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {loadError && !showCreate && (
+        <div className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+          Failed to load projects: {loadError.message}. Is the backend running?
         </div>
       )}
 
