@@ -20,6 +20,8 @@ services:
     ports:
       - "8000:8000"
     env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://arc:arc_password@db:5432/arc_db
     depends_on:
       db:
         condition: service_healthy
